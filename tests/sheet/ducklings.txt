@@ -1,0 +1,49 @@
+#BPM 180
+
+#TYPE square
+#TRACK melody
+C4:e -:e D4:e -:e E4:e -:e F4:e -:e
+G4:dq -:e G4:q -:q
+A4:e -:e A4:e -:e A4:e -:e A4:e -:e
+G4:dh -:q
+A4:e -:e A4:e -:e A4:e -:e A4:e -:e
+G4:dh -:q
+F4:e -:e F4:e -:e F4:e -:e F4:e -:e
+E4:dq -:e E4:q -:q
+G4:e -:e G4:e -:e G4:e -:e G4:e -:e
+C4:dh -:q
+
+#TYPE sine
+#TRACK harmony
+A3:e -:e B3:e -:e C4:e -:e D4:e -:e
+E4:dq -:e E4:q -:q
+F4:e -:e F4:e -:e F4:e -:e F4:e -:e
+E4:dh -:q
+F4:e -:e F4:e -:e F4:e -:e F4:e -:e
+E4:dh -:q
+D4:e -:e D4:e -:e D4:e -:e D4:e -:e
+C4:dq -:e C4:q -:q
+E4:e -:e E4:e -:e E4:e -:e E4:e -:e
+C4:dh -:q
+
+#TYPE triangle
+#TRACK bass
+C3:h -:h
+G2:h -:h
+A2:h -:h
+G2:dh -:q
+A2:dh -:q
+G2:dh -:q
+F2:dh -:q
+E2:dh -:q
+G2:dh -:q
+C3:dh -:q
+
+#TYPE sawtooth
+#TRACK drums
+#LOOP 4
+C1:s -:de -:q C3:s -:de -:q
+-:s -:de C1:s -:de C3:s -:de -:q
+#ENDLOOP
+C1:s -:de -:q C3:s -:de -:q
+C1:s -:de C1:s -:de C3:s -:de -:q

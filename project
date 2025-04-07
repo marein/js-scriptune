@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+help() {
+    echo
+    echo ------------------
+    echo Available commands
+    echo ------------------
+    echo publish
+    echo Publish to GitHub Pages.
+    echo
+}
+
+publish() {
+    mkdir -p pages
+    cp -R README.md src pages
+    cp -R tests/ pages
+    sed -i '' 's|\.\./src/|./src/|g' pages/index.html
+    cd pages
+    rm -rf .git
+    git init
+    git add .
+    git commit -m "Initial commit"
+    git remote add origin git@github.com:marein/js-scriptune.git
+    git push --force origin main:gh-pages
+}
+
+if [ "$*" = "" ]
+then
+    help
+else
+    $*
+fi

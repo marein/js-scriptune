@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Playground for marein/js-scriptune!</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1/css/pico.min.css">
+</head>
+<body>
+<main class="container">
+    <hgroup>
+        <h2>scriptune</h2>
+        <p>
+            A library to write and play music in the browser with the Web Audio API.
+        </p>
+    </hgroup>
+    <p>
+        <a href="https://github.com/marein/js-scriptune">
+            View on GitHub
+        </a>
+    </p>
+    <h3>
+        Try it out!
+    </h3>
+    <p>
+        There are a few example tunes to play with.
+        Click on one of the buttons below to see the script and hear the tune!
+    </p>
+    <div class="grid">
+        <div>
+            <button id="tetris" class="outline">Tetris!</small></button>
+            <button id="ducklings" class="outline">All My Little Ducklings!</button>
+        </div>
+        <div>
+            <article id="output">
+                Select a tune to see the script!
+            </article>
+        </div>
+    </div>
+</main>
+<script type="module">
+    import {play} from '../src/scriptune.js';
+
+    const output = document.querySelector('#output');
+
+    document.querySelectorAll('button').forEach(e => e.addEventListener('click', async e => {
+        output.innerText = 'Loading sheet...';
+        document.querySelectorAll('button').forEach(e => e.disabled = true);
+
+        const sheet = await (await (fetch(`sheet/${e.target.id}.txt`))).text();
+        output.innerText = sheet;
+        await play(sheet);
+
+        document.querySelectorAll('button').forEach(e => e.disabled = false);
+        output.innerText = 'Select a tune to see the script!';
+    }));
+</script>
+</body>
+</html>
