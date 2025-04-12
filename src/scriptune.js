@@ -1,4 +1,8 @@
 const audioContext = new AudioContext();
+const gain = audioContext.createGain();
+setMasterVolume(1);
+gain.connect(audioContext.destination);
+
 const pitches = {
     '-': 0,
     C1: 32.70, D1: 36.71, E1: 41.20, F1: 43.65, G1: 49.00, A1: 55.00, B1: 61.74,
@@ -17,28 +21,23 @@ const durations = {
  * @param {Number} frequency
  * @param {Number} duration
  * @param {'sine'|'square'|'sawtooth'|'triangle'} type
- * @param {Number} volume
  */
 async function beep (
     frequency,
     duration,
-    type = 'square',
-    volume = .1
+    type = 'square'
 ) {
     const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
 
     oscillator.connect(gain);
-    gain.connect(audioContext.destination);
 
-    gain.gain.value = volume;
     oscillator.frequency.value = frequency;
     oscillator.type = type;
 
     oscillator.start();
     await new Promise(r => setTimeout(r, duration));
     oscillator.stop();
-};
+}
 
 function parseSheet(sheet) {
     const tracks = {default: []};
@@ -101,6 +100,13 @@ function parseSheet(sheet) {
 
 async function playTrack(notes) {
     for (const note of notes) await beep(note.pitch, note.duration, note.type);
+}
+
+/**
+ * @param {Number} value
+ */
+export function setMasterVolume(value) {
+    gain.gain.value = Math.max(0, Math.min(value, 1)) / 10;
 }
 
 export async function play(sheet) {

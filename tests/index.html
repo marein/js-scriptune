@@ -26,10 +26,14 @@
         There are a few example tunes to play with.
         Click on one of the buttons below to see the script and hear the tune!
     </p>
+    <label style="max-width: 250px;">
+        Volume
+        <input type="range" id="volume" value="1" step=".1" min="0" max="1">
+    </label>
     <div class="grid">
         <div>
-            <button id="tetris" class="outline">Tetris!</small></button>
-            <button id="ducklings" class="outline">All My Little Ducklings!</button>
+            <button data-sound="tetris" class="outline">Tetris!</small></button>
+            <button data-sound="ducklings" class="outline">All My Little Ducklings!</button>
         </div>
         <div>
             <article id="output">
@@ -39,21 +43,26 @@
     </div>
 </main>
 <script type="module">
-    import {play} from '../src/scriptune.js';
+    import {play, setMasterVolume} from '../src/scriptune.js';
 
+    const soundButtons = document.querySelectorAll('[data-sound]');
     const output = document.querySelector('#output');
 
-    document.querySelectorAll('button').forEach(e => e.addEventListener('click', async e => {
+    soundButtons.forEach(e => e.addEventListener('click', async e => {
         output.innerText = 'Loading sheet...';
-        document.querySelectorAll('button').forEach(e => e.disabled = true);
+        soundButtons.forEach(e => e.disabled = true);
 
-        const sheet = await (await (fetch(`sheet/${e.target.id}.txt`))).text();
+        const sheet = await (await (fetch(`sheet/${e.target.dataset.sound}.txt`))).text();
         output.innerText = sheet;
         await play(sheet);
 
-        document.querySelectorAll('button').forEach(e => e.disabled = false);
+        soundButtons.forEach(e => e.disabled = false);
         output.innerText = 'Select a tune to see the script!';
     }));
+
+    const volume = document.querySelector('#volume');
+    setMasterVolume(volume.value);
+    volume.addEventListener('input', e => setMasterVolume(e.target.value));
 </script>
 </body>
 </html>
