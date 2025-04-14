@@ -110,7 +110,7 @@ function parseSheet(sheet) {
             const [pitch, duration] = cell.split(':');
 
             return {
-                pitch: pitches[pitch],
+                pitches: pitch.split('+').map(p => pitches[p]),
                 duration: durations[duration] * (60000 / bpm),
                 type,
                 pan,
@@ -123,7 +123,9 @@ function parseSheet(sheet) {
 }
 
 async function playTrack(notes) {
-    for (const note of notes) await beep(note.pitch, note.duration, note.type, note.pan, note.volume);
+    for (const note of notes) {
+        await Promise.all(note.pitches.map(pitch => beep(pitch, note.duration, note.type, note.pan, note.volume)));
+    }
 }
 
 /**
