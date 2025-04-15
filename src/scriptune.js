@@ -21,15 +21,20 @@ const durations = {
  * @param {Number} frequency
  * @param {Number} duration
  * @param {'sine'|'square'|'sawtooth'|'triangle'} type
+ * @param {Number} pan
  */
 async function beep (
     frequency,
     duration,
-    type = 'square'
+    type = 'square',
+    pan = 0
 ) {
     const oscillator = audioContext.createOscillator();
+    const stereoPanner = audioContext.createStereoPanner();
+    stereoPanner.pan.value = pan;
 
-    oscillator.connect(gain);
+    oscillator.connect(stereoPanner);
+    stereoPanner.connect(gain);
 
     oscillator.frequency.value = frequency;
     oscillator.type = type;
@@ -44,6 +49,7 @@ function parseSheet(sheet) {
     let currentTrack = 'default';
     let bpm = 120;
     let type = 'square';
+    let pan = 0;
     let loop = 0;
     let loopContent = [];
 
@@ -53,6 +59,11 @@ function parseSheet(sheet) {
 
         if (line.startsWith('#BPM')) {
             bpm = line.split(' ')[1];
+            return;
+        }
+
+        if (line.startsWith('#PAN')) {
+            pan = Math.max(-1, Math.min(parseFloat(line.split(' ')[1]), 1));
             return;
         }
 
@@ -90,7 +101,8 @@ function parseSheet(sheet) {
             return {
                 pitch: pitches[pitch],
                 duration: durations[duration] * (60000 / bpm),
-                type: type
+                type,
+                pan
             }
         }));
     });
@@ -99,7 +111,7 @@ function parseSheet(sheet) {
 }
 
 async function playTrack(notes) {
-    for (const note of notes) await beep(note.pitch, note.duration, note.type);
+    for (const note of notes) await beep(note.pitch, note.duration, note.type, note.pan);
 }
 
 /**
