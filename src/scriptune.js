@@ -1,7 +1,7 @@
 const audioContext = new AudioContext();
-const gain = audioContext.createGain();
+const masterGain = audioContext.createGain();
 setMasterVolume(1);
-gain.connect(audioContext.destination);
+masterGain.connect(audioContext.destination);
 
 const pitches = {
     '-': 0,
@@ -22,19 +22,24 @@ const durations = {
  * @param {Number} duration
  * @param {'sine'|'square'|'sawtooth'|'triangle'} type
  * @param {Number} pan
+ * @param {Number} volume
  */
 async function beep (
     frequency,
     duration,
     type = 'square',
-    pan = 0
+    pan = 0,
+    volume = 1
 ) {
     const oscillator = audioContext.createOscillator();
     const stereoPanner = audioContext.createStereoPanner();
     stereoPanner.pan.value = pan;
+    const gain = audioContext.createGain();
+    gain.gain.value = volume;
 
     oscillator.connect(stereoPanner);
     stereoPanner.connect(gain);
+    gain.connect(masterGain);
 
     oscillator.frequency.value = frequency;
     oscillator.type = type;
@@ -50,6 +55,7 @@ function parseSheet(sheet) {
     let bpm = 120;
     let type = 'square';
     let pan = 0;
+    let volume = 1;
     let loop = 0;
     let loopContent = [];
 
@@ -64,6 +70,11 @@ function parseSheet(sheet) {
 
         if (line.startsWith('#PAN')) {
             pan = Math.max(-1, Math.min(parseFloat(line.split(' ')[1]), 1));
+            return;
+        }
+
+        if (line.startsWith('#VOLUME')) {
+            volume = Math.max(0, Math.min(parseFloat(line.split(' ')[1]), 1));
             return;
         }
 
@@ -102,7 +113,8 @@ function parseSheet(sheet) {
                 pitch: pitches[pitch],
                 duration: durations[duration] * (60000 / bpm),
                 type,
-                pan
+                pan,
+                volume
             }
         }));
     });
@@ -111,14 +123,14 @@ function parseSheet(sheet) {
 }
 
 async function playTrack(notes) {
-    for (const note of notes) await beep(note.pitch, note.duration, note.type, note.pan);
+    for (const note of notes) await beep(note.pitch, note.duration, note.type, note.pan, note.volume);
 }
 
 /**
  * @param {Number} value
  */
 export function setMasterVolume(value) {
-    gain.gain.value = Math.max(0, Math.min(value, 1)) / 10;
+    masterGain.gain.value = Math.max(0, Math.min(value, 1)) / 10;
 }
 
 export async function play(sheet) {
