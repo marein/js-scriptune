@@ -5,11 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Playground for marein/js-scriptune!</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1/css/pico.min.css">
+    <style>
+        .sheets {
+            grid-column-gap: var(--pico-grid-column-gap);
+            grid-row-gap: var(--pico-grid-row-gap);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        @media (max-width: 767px) {
+            .sheets {
+                grid-template-columns: 1fr;
+            }
+        }
+        .sheet {
+            display: flex;
+            flex-direction: column;
+        }
+        .sheet a {
+            margin-top: auto;
+        }
+        dialog textarea {
+            height: 40vh;
+        }
+    </style>
 </head>
 <body>
 <main class="container">
     <hgroup>
-        <h2>scriptune</h2>
+        <h2>Scriptune</h2>
         <p>
             A library to write and play music in the browser with the Web Audio API.
         </p>
@@ -20,47 +43,118 @@
         </a>
     </p>
     <h3>
-        Try it out!
+        Explore the Possibilities
     </h3>
     <p>
-        There are a few example tunes to play with.
-        Click on one of the buttons below to see the script and hear the tune!
+        Begin by listening to songs rendered in Scriptune's notation.
+        Then, dive into the individual features powering the library.
     </p>
-    <label style="max-width: 250px;">
-        Volume
-        <input type="range" id="volume" value="1" step=".1" min="0" max="1">
-    </label>
-    <div class="grid">
-        <div>
-            <button data-sound="tetris" class="outline">Tetris!</button>
-            <button data-sound="ducklings" class="outline">All My Little Ducklings!</button>
-            <button data-sound="pan" class="outline">Adjust Panning!</button>
-            <button data-sound="volume" class="outline">Adjust Volume!</button>
-            <button data-sound="chords" class="outline">Play Chords!</button>
-        </div>
-        <div>
-            <article id="output">
-                Select a tune to see the script!
-            </article>
-        </div>
+    <h5>Features in a Song</h5>
+    <div class="sheets">
+        <article class="sheet">
+            <h4>Tetris!</h4>
+            <p>
+                This is an example of an arrangement that uses multiple tracks, with different waveforms,
+                using loops and other features.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="tetris"
+               data-modal-title="Tetris!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>All My Little Ducklings!</h4>
+            <p>
+                This is an example of an arrangement that uses multiple tracks, with different waveforms,
+                a melody and a harmony part panning left and right, using loops and other features.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="ducklings"
+               data-modal-title="All My Little Ducklings!">Show notation</a>
+        </article>
+    </div>
+    <h5>Features in the Spotlight</h5>
+    <div class="sheets">
+        <article class="sheet">
+            <h4>Play Chords!</h4>
+            <p>
+                Simultaneously trigger multiple notes to create rich, harmonious chords.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="chords"
+               data-modal-title="Play Chords!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Adjust Panning!</h4>
+            <p>
+                Shift audio across the stereo field to craft a dynamic, immersive sound.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="pan"
+               data-modal-title="Adjust Panning!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Adjust Volume!</h4>
+            <p>
+                Control overall output levels for a perfectly balanced mix.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="volume"
+               data-modal-title="Adjust Volume!">Show notation</a>
+        </article>
+        <div></div>
     </div>
 </main>
+<footer class="container">
+    <p>
+        <small>Built by <a href="https://github.com/marein" class="secondary" target="_blank">@marein</a></small>
+    </p>
+</footer>
+<dialog data-modal>
+    <article>
+        <header>
+            <h3 data-output-title></h3>
+        </header>
+        <label style="max-width: 250px;">
+            Volume
+            <input type="range" id="volume" value="1" step=".1" min="0" max="1">
+        </label>
+        <label for="sheet">
+            Feel free to edit or just hit play
+        </label>
+        <textarea id="sheet" data-output-sheet></textarea>
+        <footer>
+            <button class="secondary" data-modal-close>Close</button>
+            <button data-modal-play>Play!</button>
+        </footer>
+    </article>
+</dialog>
 <script type="module">
     import {play, setMasterVolume} from '../src/scriptune.js';
 
-    const soundButtons = document.querySelectorAll('[data-sound]');
-    const output = document.querySelector('#output');
+    const dialog = document.querySelector('[data-modal]');
+    const dialogPlay = document.querySelector('[data-modal-play]');
+    const outputTitle = document.querySelector('[data-output-title]');
+    const outputSheet = document.querySelector('[data-output-sheet]');
+    let abortController = new AbortController();
 
-    soundButtons.forEach(e => e.addEventListener('click', async e => {
-        output.innerText = 'Loading sheet...';
-        soundButtons.forEach(e => e.disabled = true);
+    document.querySelectorAll('[data-modal-open]').forEach(b => b.addEventListener('click', async e => {
+        dialogPlay.disabled = true;
+        outputSheet.disabled = true;
+        outputSheet.value = 'Loading sheet...';
+        outputTitle.innerText = e.target.dataset.modalTitle;
+        dialog.setAttribute('open', '');
+        document.body.classList.add('modal-is-open');
+        outputSheet.value = await (await (fetch(`sheet/${e.target.dataset.modalSound}.txt`))).text();
+        outputSheet.disabled = false;
+        dialogPlay.disabled = false;
+    }));
 
-        const sheet = await (await (fetch(`sheet/${e.target.dataset.sound}.txt`))).text();
-        output.innerText = sheet;
-        await play(sheet);
+    dialogPlay.addEventListener('click', async () => {
+        abortController.abort();
+        abortController = new AbortController();
+        await play(outputSheet.value, {signal: abortController.signal});
+    });
 
-        soundButtons.forEach(e => e.disabled = false);
-        output.innerText = 'Select a tune to see the script!';
+    document.querySelectorAll('[data-modal-close]').forEach(b => b.addEventListener('click', async e => {
+        abortController.abort();
+        abortController = new AbortController();
+        e.target.closest('[data-modal]').removeAttribute('open');
+        document.body.classList.remove('modal-is-open');
     }));
 
     const volume = document.querySelector('#volume');

@@ -1,5 +1,6 @@
 #BPM 180
 
+#PAN -.5
 #TYPE square
 #TRACK melody
 C4:e -:e D4:e -:e E4:e -:e F4:e -:e
@@ -13,6 +14,7 @@ E4:dq -:e E4:q -:q
 G4:e -:e G4:e -:e G4:e -:e G4:e -:e
 C4:dh -:q
 
+#PAN .5
 #TYPE sine
 #TRACK harmony
 A3:e -:e B3:e -:e C4:e -:e D4:e -:e
@@ -26,6 +28,7 @@ C4:dq -:e C4:q -:q
 E4:e -:e E4:e -:e E4:e -:e E4:e -:e
 C4:dh -:q
 
+#PAN 0
 #TYPE triangle
 #TRACK bass
 C3:h -:h
