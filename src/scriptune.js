@@ -1,3 +1,9 @@
+/**
+ * @typedef {{signal?: AbortSignal}} Options
+ * @typedef {{pitches: Number[], duration: Number, type: String, pan: Number, volume: Number}} Note
+ * @typedef {{[key: string]: Note[]}} Tracks
+ */
+
 const audioContext = new AudioContext();
 const masterGain = audioContext.createGain();
 setMasterVolume(1);
@@ -19,36 +25,42 @@ const durations = {
 
 /**
  * @param {Number} frequency
- * @param {Number} duration
- * @param {'sine'|'square'|'sawtooth'|'triangle'} type
- * @param {Number} pan
- * @param {Number} volume
+ * @param {Note} note
+ * @param {Options} options
+ * @returns {Promise<void>}
  */
-async function beep (
-    frequency,
-    duration,
-    type = 'square',
-    pan = 0,
-    volume = 1
-) {
+async function beep (frequency, note, options) {
     const oscillator = audioContext.createOscillator();
     const stereoPanner = audioContext.createStereoPanner();
-    stereoPanner.pan.value = pan;
+    stereoPanner.pan.value = note.pan;
     const gain = audioContext.createGain();
-    gain.gain.value = volume;
+    gain.gain.value = note.volume;
 
     oscillator.connect(stereoPanner);
     stereoPanner.connect(gain);
     gain.connect(masterGain);
 
     oscillator.frequency.value = frequency;
-    oscillator.type = type;
+    oscillator.type = note.type;
 
     oscillator.start();
-    await new Promise(r => setTimeout(r, duration));
+    await new Promise(resolve => {
+        let timer = null;
+        const onResolve = () => {
+            options.signal?.removeEventListener('abort', onResolve);
+            clearTimeout(timer);
+            resolve();
+        };
+        timer = setTimeout(onResolve, note.duration);
+        options.signal?.addEventListener('abort', onResolve)
+    });
     oscillator.stop();
 }
 
+/**
+ * @param {String} sheet
+ * @returns {Tracks}
+ */
 function parseSheet(sheet) {
     const tracks = {default: []};
     let currentTrack = 'default';
@@ -79,7 +91,7 @@ function parseSheet(sheet) {
         }
 
         if (line.startsWith('#LOOP')) {
-            loop = line.split(' ')[1];
+            loop = parseInt(line.split(' ')[1]);
             loopContent = [];
             return;
         }
@@ -122,21 +134,34 @@ function parseSheet(sheet) {
     return tracks;
 }
 
-async function playTrack(notes) {
+/**
+ * @param {Note[]} notes
+ * @param {Options} options
+ * @returns {Promise<void>}
+ */
+async function playTrack(notes, options) {
     for (const note of notes) {
-        await Promise.all(note.pitches.map(pitch => beep(pitch, note.duration, note.type, note.pan, note.volume)));
+        if (options.signal?.aborted) return;
+
+        await Promise.all(note.pitches.map(pitch => beep(pitch, note, options)));
     }
 }
 
 /**
  * @param {Number} value
+ * @returns {void}
  */
 export function setMasterVolume(value) {
     masterGain.gain.value = Math.max(0, Math.min(value, 1)) / 10;
 }
 
-export async function play(sheet) {
+/**
+ * @param {String} sheet
+ * @param {Options} options
+ * @returns {Promise<void>}
+ */
+export async function play(sheet, options = {}) {
     const tracks = parseSheet(sheet);
 
-    await Promise.all(Object.keys(tracks).map(name => playTrack(tracks[name])));
+    await Promise.all(Object.keys(tracks).map(name => playTrack(tracks[name], options)));
 }
