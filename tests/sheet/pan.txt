@@ -3,9 +3,10 @@ C4:q D4:q E4:q F4:q G4:q
 #PAN -1
 C4:q D4:q E4:q F4:q G4:q
 
-#PAN 1
+#PAN 0
 #TRACK b
 G4:q A4:q B4:q C5:q D5:q
+#PAN 1
 G4:q A4:q B4:q C5:q D5:q
 
 #TRACK c
