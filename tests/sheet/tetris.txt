@@ -41,6 +41,6 @@ A1:q A1:dh
 #TYPE sawtooth
 #TRACK drums
 #LOOP 8
-C1:s -:de -:q E2:s -:de -:q
-C1:s -:de C1:s -:de E2:s -:de -:q
+    C1:s -:de -:q E2:s -:de -:q
+    C1:s -:de C1:s -:de E2:s -:de -:q
 #ENDLOOP

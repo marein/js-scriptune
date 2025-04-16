@@ -1,0 +1,6 @@
+#LOOP 2
+    #LOOP 3
+        C4:de E4:s G4:e E4:e
+    #ENDLOOP
+    F4:e E4:e G4:e E4:e
+#ENDLOOP

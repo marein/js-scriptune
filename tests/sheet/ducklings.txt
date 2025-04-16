@@ -45,8 +45,8 @@ C3:dh -:q
 #TYPE sawtooth
 #TRACK drums
 #LOOP 4
-C1:s -:de -:q C3:s -:de -:q
--:s -:de C1:s -:de C3:s -:de -:q
+    C1:s -:de -:q C3:s -:de -:q
+    -:s -:de C1:s -:de C3:s -:de -:q
 #ENDLOOP
 C1:s -:de -:q C3:s -:de -:q
 C1:s -:de C1:s -:de C3:s -:de -:q

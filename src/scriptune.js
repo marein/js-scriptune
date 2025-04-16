@@ -63,72 +63,46 @@ async function beep (frequency, note, options) {
  */
 function parseSheet(sheet) {
     const tracks = {default: []};
-    let currentTrack = 'default';
+    let track = tracks.default;
     let bpm = 120;
     let type = 'square';
     let pan = 0;
     let volume = 1;
-    let loop = 0;
-    let loopContent = [];
+    const loops = [];
+    const commands = {
+        '#BPM': args => bpm = parseInt(args[0]),
+        '#PAN': args => pan = Math.max(-1, Math.min(parseFloat(args[0]), 1)),
+        '#VOLUME': args => volume = Math.max(0, Math.min(parseFloat(args[0]), 1)),
+        '#TYPE': args => type = args[0],
+        '#TRACK': args => track = tracks[args[0]] = [],
+        '#LOOP': args => loops.push({count: parseInt(args[0]), content: []}),
+        '#ENDLOOP': () => {
+            const loop = loops.pop();
 
-    const lines = sheet.split('\n').map(l => l.trim()).filter(l => l !== '');
+            (loops.length > 0 ? loops[loops.length - 1].content : track).push(
+                ...Array(loop.count).fill(loop.content).flat()
+            );
+        },
+        '#NOTES': args => (loops.length > 0 ? loops[loops.length - 1].content : track)
+            .push(...args.map(cell => {
+                const [pitch, duration] = cell.split(':');
+
+                return {
+                    pitches: pitch.split('+').map(p => pitches[p]),
+                    duration: durations[duration] * (60000 / bpm),
+                    type,
+                    pan,
+                    volume
+                }
+            }))
+    };
+
+    const lines = sheet.split('\n').map(l => l.replace(/;.*/, '').trim()).filter(l => l !== '');
     lines.forEach(line => {
-        if (line.startsWith(';')) return;
+        if (!line.startsWith('#')) line = '#NOTES ' + line;
+        const [command, ...args] = line.split(/\s+/);
 
-        if (line.startsWith('#BPM')) {
-            bpm = line.split(' ')[1];
-            return;
-        }
-
-        if (line.startsWith('#PAN')) {
-            pan = Math.max(-1, Math.min(parseFloat(line.split(' ')[1]), 1));
-            return;
-        }
-
-        if (line.startsWith('#VOLUME')) {
-            volume = Math.max(0, Math.min(parseFloat(line.split(' ')[1]), 1));
-            return;
-        }
-
-        if (line.startsWith('#LOOP')) {
-            loop = parseInt(line.split(' ')[1]);
-            loopContent = [];
-            return;
-        }
-
-        if (line.startsWith('#ENDLOOP')) {
-            for (let i = 0; i < loop; i++) {
-                tracks[currentTrack].push(...loopContent);
-            }
-            loop = 0;
-            loopContent = [];
-            return;
-        }
-
-        if (line.startsWith('#TYPE')) {
-            type = line.split(' ')[1];
-            return;
-        }
-
-        if (line.startsWith('#TRACK')) {
-            currentTrack = line.split(' ')[1];
-            tracks[currentTrack] = [];
-            return;
-        }
-
-        let notes = loop > 0 ? loopContent : tracks[currentTrack];
-
-        notes.push(...line.split(/\s+/).map(cell => {
-            const [pitch, duration] = cell.split(':');
-
-            return {
-                pitches: pitch.split('+').map(p => pitches[p]),
-                duration: durations[duration] * (60000 / bpm),
-                type,
-                pan,
-                volume
-            }
-        }));
+        commands[command](args);
     });
 
     return tracks;
