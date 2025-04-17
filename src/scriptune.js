@@ -24,40 +24,6 @@ const durations = {
 };
 
 /**
- * @param {Number} frequency
- * @param {Note} note
- * @param {Options} options
- * @returns {Promise<void>}
- */
-async function beep (frequency, note, options) {
-    const oscillator = audioContext.createOscillator();
-    const stereoPanner = audioContext.createStereoPanner();
-    stereoPanner.pan.value = note.pan;
-    const gain = audioContext.createGain();
-    gain.gain.value = note.volume;
-
-    oscillator.connect(stereoPanner);
-    stereoPanner.connect(gain);
-    gain.connect(masterGain);
-
-    oscillator.frequency.value = frequency;
-    oscillator.type = note.type;
-
-    oscillator.start();
-    await new Promise(resolve => {
-        let timer = null;
-        const onResolve = () => {
-            options.signal?.removeEventListener('abort', onResolve);
-            clearTimeout(timer);
-            resolve();
-        };
-        timer = setTimeout(onResolve, note.duration);
-        options.signal?.addEventListener('abort', onResolve)
-    });
-    oscillator.stop();
-}
-
-/**
  * @param {String} sheet
  * @returns {Tracks}
  */
@@ -89,7 +55,7 @@ function parseSheet(sheet) {
 
                 return {
                     pitches: pitch.split('+').map(p => pitches[p]),
-                    duration: durations[duration] * (60000 / bpm),
+                    duration: durations[duration] * 60 / bpm,
                     type,
                     pan,
                     volume
@@ -109,19 +75,6 @@ function parseSheet(sheet) {
 }
 
 /**
- * @param {Note[]} notes
- * @param {Options} options
- * @returns {Promise<void>}
- */
-async function playTrack(notes, options) {
-    for (const note of notes) {
-        if (options.signal?.aborted) return;
-
-        await Promise.all(note.pitches.map(pitch => beep(pitch, note, options)));
-    }
-}
-
-/**
  * @param {Number} value
  * @returns {void}
  */
@@ -136,6 +89,41 @@ export function setMasterVolume(value) {
  */
 export async function play(sheet, options = {}) {
     const tracks = parseSheet(sheet);
+    const currentTime = audioContext.currentTime;
+    const oscillators = [];
+    const promises = [];
+    const onAbort = () => oscillators.forEach(oscillator => oscillator.stop());
 
-    await Promise.all(Object.keys(tracks).map(name => playTrack(tracks[name], options)));
+    options.signal?.addEventListener('abort', onAbort);
+
+    Object.values(tracks).forEach(notes => {
+        let nextTime = currentTime;
+        notes.forEach(note => {
+            note.pitches.forEach(pitch => {
+                const oscillator = audioContext.createOscillator();
+                oscillator.type = note.type;
+                oscillator.frequency.value = pitch;
+                oscillator.start(nextTime);
+                oscillator.stop(nextTime + note.duration);
+
+                const stereoPanner = audioContext.createStereoPanner();
+                stereoPanner.pan.value = note.pan;
+
+                const gain = audioContext.createGain();
+                gain.gain.value = note.volume;
+
+                oscillator.connect(stereoPanner);
+                stereoPanner.connect(gain);
+                gain.connect(masterGain);
+
+                oscillators.push(oscillator);
+                promises.push(new Promise(r => oscillator.onended = r));
+            });
+            nextTime += note.duration;
+        });
+    });
+
+    await Promise.all(promises);
+
+    options.signal?.removeEventListener('abort', onAbort);
 }
