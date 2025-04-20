@@ -4,6 +4,7 @@
  * @typedef {{[key: string]: Note[]}} Tracks
  */
 
+const scheduleAheadInSeconds = 5;
 const audioContext = new AudioContext();
 const masterGain = audioContext.createGain();
 setMasterVolume(1);
@@ -24,12 +25,29 @@ const durations = {
 };
 
 /**
- * @param {Number} frequency
- * @param {Note} note
+ * @param {Number} duration
  * @param {Options} options
  * @returns {Promise<void>}
  */
-async function beep (frequency, note, options) {
+async function sleep(duration, options) {
+    let onAbort, timerId;
+    await Promise.race([
+        new Promise(r => timerId = setTimeout(r, duration)),
+        new Promise(r => options.signal?.addEventListener('abort', onAbort = r))
+    ]).finally(() => {
+        clearTimeout(timerId);
+        options.signal?.removeEventListener('abort', onAbort)
+    });
+}
+
+/**
+ * @param {Number} frequency
+ * @param {Note} note
+ * @param {Number} currentTime
+ * @param {Options} options
+ * @returns {Promise<void>}
+ */
+async function beep(frequency, note, currentTime, options) {
     const oscillator = audioContext.createOscillator();
     const stereoPanner = audioContext.createStereoPanner();
     stereoPanner.pan.value = note.pan;
@@ -42,19 +60,19 @@ async function beep (frequency, note, options) {
 
     oscillator.frequency.value = frequency;
     oscillator.type = note.type;
+    oscillator.start(currentTime);
+    oscillator.stop(currentTime + note.duration);
 
-    oscillator.start();
-    await new Promise(resolve => {
-        let timer = null;
-        const onResolve = () => {
-            options.signal?.removeEventListener('abort', onResolve);
-            clearTimeout(timer);
-            resolve();
-        };
-        timer = setTimeout(onResolve, note.duration);
-        options.signal?.addEventListener('abort', onResolve)
+    const onAbort = () => oscillator.stop();
+    options.signal?.addEventListener('abort', onAbort);
+
+    return new Promise(r => oscillator.onended = () => {
+        gain.disconnect();
+        stereoPanner.disconnect();
+        oscillator.disconnect();
+        options.signal?.removeEventListener('abort', onAbort);
+        r();
     });
-    oscillator.stop();
 }
 
 /**
@@ -89,7 +107,7 @@ function parseSheet(sheet) {
 
                 return {
                     pitches: pitch.split('+').map(p => pitches[p]),
-                    duration: durations[duration] * (60000 / bpm),
+                    duration: durations[duration] * 60 / bpm,
                     type,
                     pan,
                     volume
@@ -110,15 +128,22 @@ function parseSheet(sheet) {
 
 /**
  * @param {Note[]} notes
+ * @param {Number} currentTime
  * @param {Options} options
  * @returns {Promise<void>}
  */
-async function playTrack(notes, options) {
-    for (const note of notes) {
-        if (options.signal?.aborted) return;
+async function playTrack(notes, currentTime, options) {
+    let lastBeeps = [];
 
-        await Promise.all(note.pitches.map(pitch => beep(pitch, note, options)));
+    for (const note of notes) {
+        if (currentTime - audioContext.currentTime > scheduleAheadInSeconds) await sleep(1000, options);
+        if (options.signal?.aborted) break;
+
+        lastBeeps = note.pitches.map(pitch => beep(pitch, note, currentTime, options));
+        currentTime += note.duration;
     }
+
+    await Promise.all(lastBeeps);
 }
 
 /**
@@ -135,7 +160,7 @@ export function setMasterVolume(value) {
  * @returns {Promise<void>}
  */
 export async function play(sheet, options = {}) {
-    const tracks = parseSheet(sheet);
+    const tracks = parseSheet(sheet), currentTime = audioContext.currentTime;
 
-    await Promise.all(Object.keys(tracks).map(name => playTrack(tracks[name], options)));
+    await Promise.all(Object.values(tracks).map(notes => playTrack(notes, currentTime, options)));
 }
