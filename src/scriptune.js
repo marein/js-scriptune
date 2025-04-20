@@ -4,6 +4,7 @@
  * @typedef {{[key: string]: Note[]}} Tracks
  */
 
+const scheduleAheadInSeconds = 5;
 const audioContext = new AudioContext();
 const masterGain = audioContext.createGain();
 setMasterVolume(1);
@@ -135,7 +136,7 @@ async function playTrack(notes, currentTime, options) {
     let lastBeeps = [];
 
     for (const note of notes) {
-        if (currentTime - audioContext.currentTime > 5) await sleep(1000, options);
+        if (currentTime - audioContext.currentTime > scheduleAheadInSeconds) await sleep(1000, options);
         if (options.signal?.aborted) break;
 
         lastBeeps = note.pitches.map(pitch => beep(pitch, note, currentTime, options));

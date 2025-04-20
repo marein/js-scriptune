@@ -1,0 +1,9 @@
+#LOOP 10
+    #BPM 3000
+    #LOOP 1000
+        C4:s
+    #ENDLOOP
+    C4:w -:w D4:w -:w E4:w -:w G4:w -:w
+#ENDLOOP
+C5:w -:w D5:w -:w E5:w -:w G5:w -:w
+C6:w -:w D6:w -:w E6:w -:w G6:w -:w
