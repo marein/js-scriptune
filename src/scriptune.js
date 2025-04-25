@@ -92,7 +92,7 @@ function parseSheet(sheet) {
         '#PAN': args => pan = Math.max(-1, Math.min(parseFloat(args[0]), 1)),
         '#VOLUME': args => volume = Math.max(0, Math.min(parseFloat(args[0]), 1)),
         '#TYPE': args => type = args[0],
-        '#TRACK': args => track = tracks[args[0]] = [],
+        '#TRACK': args => track = tracks[args[0]] ??= [],
         '#LOOP': args => loops.push({count: parseInt(args[0]), content: []}),
         '#ENDLOOP': () => {
             const loop = loops.pop();

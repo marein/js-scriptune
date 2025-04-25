@@ -10,19 +10,33 @@
             grid-column-gap: var(--pico-grid-column-gap);
             grid-row-gap: var(--pico-grid-row-gap);
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
         }
-        @media (max-width: 767px) {
+        @media (min-width: 768px) {
             .sheets {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (min-width: 1024px) {
+            .sheets.sheets--spotlight {
+                grid-template-columns: 1fr 1fr 1fr;
             }
         }
         .sheet {
             display: flex;
+            position: relative;
             flex-direction: column;
         }
         .sheet a {
             margin-top: auto;
+        }
+        .sheet a:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
         dialog textarea {
             height: 40vh;
@@ -71,7 +85,15 @@
         </article>
     </div>
     <h5>Features in the Spotlight</h5>
-    <div class="sheets">
+    <div class="sheets sheets--spotlight">
+        <article class="sheet">
+            <h4>Play Notes!</h4>
+            <p>
+                Trigger individual notes to create melodies and sound effects.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="notes"
+               data-modal-title="Play Notes!">Show notation</a>
+        </article>
         <article class="sheet">
             <h4>Play Chords!</h4>
             <p>
@@ -89,12 +111,28 @@
                data-modal-title="Loop Notes!">Show notation</a>
         </article>
         <article class="sheet">
-            <h4>Adjust Panning!</h4>
+            <h4>Parallel Tracks!</h4>
             <p>
-                Shift audio across the stereo field to craft a dynamic, immersive sound.
+                Create multiple tracks to play different melodies or harmonies at the same time.
             </p>
-            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="pan"
-               data-modal-title="Adjust Panning!">Show notation</a>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="tracks"
+               data-modal-title="Parallel Tracks!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Different Waveforms!</h4>
+            <p>
+                Use different waveforms to create a variety of sounds.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="waveforms"
+               data-modal-title="Different Waveforms!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Adjust BPM!</h4>
+            <p>
+                Change the tempo to create a faster or slower feel.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="bpm"
+               data-modal-title="Adjust BPM!">Show notation</a>
         </article>
         <article class="sheet">
             <h4>Adjust Volume!</h4>
@@ -103,6 +141,14 @@
             </p>
             <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="volume"
                data-modal-title="Adjust Volume!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Adjust Panning!</h4>
+            <p>
+                Shift audio across the stereo field to craft a dynamic, immersive sound.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="pan"
+               data-modal-title="Adjust Panning!">Show notation</a>
         </article>
         <article class="sheet">
             <h4>Any Length!</h4>

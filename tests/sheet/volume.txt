@@ -1,33 +1,55 @@
+; "#VOLUME <value>".
+; The value is a floating number
+; between 0 and 1.
+
 #TRACK a
-C4:q D4:q E4:q F4:q G4:q
-#VOLUME .3
-C4:q D4:q E4:q F4:q G4:q
-
-#VOLUME 1
-#TRACK b
-G4:q A4:q B4:q C5:q D5:q
-G4:q A4:q B4:q C5:q D5:q
-
-#TRACK c
--:w -:q
--:dw
-#VOLUME .1
-C4:q
-#VOLUME .2
-C4:q
-#VOLUME .3
-C4:q
-#VOLUME .4
-C4:q
-#VOLUME .5
-C4:q
-#VOLUME .6
-C4:q
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+F4:e E4:e G4:e E4:e
 #VOLUME .7
-C4:q
-#VOLUME .8
-C4:q
-#VOLUME .9
-C4:q
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+F4:e E4:e G4:e E4:e
+#VOLUME .5
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+F4:e E4:e G4:e E4:e
+#VOLUME .3
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+F4:e E4:e G4:e E4:e
+#VOLUME .1
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+F4:e E4:e G4:e E4:e
+
+#TRACK b
+E4:q -:q
+E4:q -:q
+E4:q -:q
+A4:q B4:q
+#VOLUME .3
+E4:q -:q
+E4:q -:q
+E4:q -:q
+A4:q B4:q
+#VOLUME .5
+E4:q -:q
+E4:q -:q
+E4:q -:q
+A4:q B4:q
+#VOLUME .7
+E4:q -:q
+E4:q -:q
+E4:q -:q
+A4:q B4:q
 #VOLUME 1
-C4:q
+E4:q -:q
+E4:q -:q
+E4:q -:q
+A4:q B4:q

@@ -1,9 +1,33 @@
+; Test for diagnostic purposes.
+; This schedules about 10,500 notes
+; and takes about 105 seconds to play.
+
+#VOLUME .5
 #LOOP 10
+    #BPM 500
+    #LOOP 150
+        C1:s
+    #ENDLOOP
+    #BPM 1000
+    #LOOP 150
+        C2:s
+    #ENDLOOP
     #BPM 3000
-    #LOOP 1000
+    #LOOP 150
+        C3:s
+    #ENDLOOP
+    #LOOP 150
         C4:s
     #ENDLOOP
-    C4:w -:w D4:w -:w E4:w -:w G4:w -:w
+    #LOOP 150
+        C5:s
+    #ENDLOOP
+    #LOOP 150
+        C6:s
+    #ENDLOOP
+    #LOOP 150
+        B7:s
+    #ENDLOOP
 #ENDLOOP
 C5:w -:w D5:w -:w E5:w -:w G5:w -:w
 C6:w -:w D6:w -:w E6:w -:w G6:w -:w
