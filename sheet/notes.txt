@@ -1,0 +1,11 @@
+; "<pitch>:<length>".
+; C1 to B7 are valid pitches.
+; "-:<length>" is a pause.
+; s = 1/16, e = 1/8, q = 1/4,
+; h = 1/2, w = 1
+; ds, de, dq, dh, dw = dotted note
+
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+F4:e E4:e G4:e E4:e
