@@ -4,11 +4,15 @@
  * @typedef {{[key: string]: Note[]}} Tracks
  */
 
+const config = document.querySelector('meta[name="scriptune-config"]');
+let defaultMasterVolume = parseFloat(config?.dataset.defaultMasterVolume);
+defaultMasterVolume = clampVolume(isNaN(defaultMasterVolume) ? 1 : defaultMasterVolume);
+const volumeStorageKey = config?.dataset.volumeStorageKey || 'scriptune-master-volume';
 const scheduleAheadInSeconds = 5;
 const audioContext = new AudioContext();
 const masterGain = audioContext.createGain();
-setMasterVolume(1);
 masterGain.connect(audioContext.destination);
+setMasterVolume(getMasterVolume());
 
 const pitches = {
     '-': 0,
@@ -154,11 +158,29 @@ async function playTrack(notes, currentTime, options) {
 }
 
 /**
- * @param {Number} value
+ * @param {Number} volume
+ * @returns {Number}
+ */
+function clampVolume(volume) {
+    return Math.max(0, Math.min(volume, 1));
+}
+
+/**
+ * @param {Number} volume
  * @returns {void}
  */
-export function setMasterVolume(value) {
-    masterGain.gain.value = Math.max(0, Math.min(value, 1)) / 10;
+export function setMasterVolume(volume) {
+    volume = clampVolume(volume);
+    localStorage.setItem(volumeStorageKey, volume.toString());
+    masterGain.gain.value = volume / 10;
+}
+
+/**
+ * @returns {Number}
+ */
+export function getMasterVolume() {
+    const volume = parseFloat(localStorage.getItem(volumeStorageKey));
+    return clampVolume(isNaN(volume) ? defaultMasterVolume : volume);
 }
 
 /**
