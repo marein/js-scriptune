@@ -185,7 +185,7 @@
     </article>
 </dialog>
 <script type="module">
-    import {play, setMasterVolume} from '../src/scriptune.js';
+    import {play, setMasterVolume, getMasterVolume} from '../src/scriptune.js';
 
     const dialog = document.querySelector('[data-modal]');
     const dialogPlay = document.querySelector('[data-modal-play]');
@@ -219,8 +219,8 @@
     }));
 
     const volume = document.querySelector('#volume');
-    setMasterVolume(volume.value);
-    volume.addEventListener('input', e => setMasterVolume(e.target.value));
+    volume.value = getMasterVolume();
+    volume.addEventListener('input', e => setMasterVolume(parseFloat(e.target.value)));
 </script>
 </body>
 </html>
