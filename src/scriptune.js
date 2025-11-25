@@ -193,3 +193,21 @@ export async function play(sheet, options = {}) {
 
     await Promise.all(Object.values(tracks).map(notes => playTrack(notes, currentTime, options)));
 }
+
+/**
+ * @param {String} sheet
+ * @param {Number} throttleTimeMs
+ * @param {Options} options
+ * @returns {(throttleKey: string) => Promise<void>}
+ */
+export function createThrottledPlay(sheet, throttleTimeMs = 3000, options = {}) {
+    const throttleKeys = new Map();
+
+    return async (throttleKey = '') => {
+        const now = Date.now();
+        if (throttleKeys.has(throttleKey) && throttleKeys.get(throttleKey) >= now) return;
+        if (throttleKey) throttleKeys.set(throttleKey, now + throttleTimeMs);
+        await play(sheet, options);
+        throttleKeys.forEach((v, k) => v <= now && throttleKeys.delete(k));
+    };
+}
