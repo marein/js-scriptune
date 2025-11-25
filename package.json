@@ -1,0 +1,17 @@
+{
+  "name": "@marein/js-scriptune",
+  "version": "0.0.1",
+  "description": "A library that lets you write music in a human-readable format and play it in the browser using the Web Audio API.",
+  "homepage": "https://marein.github.io/js-scriptune/",
+  "bugs": {
+    "url": "https://github.com/marein/js-scriptune/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marein/js-scriptune.git"
+  },
+  "license": "MIT",
+  "author": "Markus Reinhold",
+  "type": "module",
+  "main": "src/scriptune.js"
+}
