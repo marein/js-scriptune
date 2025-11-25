@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Playground for marein/js-scriptune!</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1/css/pico.min.css">
+    <style>
+        .sheets {
+            grid-column-gap: var(--pico-grid-column-gap);
+            grid-row-gap: var(--pico-grid-row-gap);
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+        @media (min-width: 768px) {
+            .sheets {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (min-width: 1024px) {
+            .sheets.sheets--spotlight {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+        .sheet {
+            display: flex;
+            position: relative;
+            flex-direction: column;
+        }
+        .sheet a {
+            margin-top: auto;
+        }
+        .sheet a:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        dialog textarea {
+            height: 40vh;
+        }
+    </style>
+</head>
+<body>
+<main class="container">
+    <hgroup>
+        <h2>Scriptune</h2>
+        <p>
+            A library to write and play music in the browser with the Web Audio API.
+        </p>
+    </hgroup>
+    <p>
+        <a href="https://github.com/marein/js-scriptune">
+            View on GitHub
+        </a>
+    </p>
+    <h3>
+        Explore the Possibilities
+    </h3>
+    <p>
+        Begin by listening to songs rendered in Scriptune's notation.
+        Then, dive into the individual features powering the library.
+    </p>
+    <h5>Features in a Song</h5>
+    <div class="sheets">
+        <article class="sheet">
+            <h4>Tetris!</h4>
+            <p>
+                This is an example of an arrangement that uses multiple tracks, with different waveforms,
+                using loops and other features.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="tetris"
+               data-modal-title="Tetris!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>All My Little Ducklings!</h4>
+            <p>
+                This is an example of an arrangement that uses multiple tracks, with different waveforms,
+                a melody and a harmony part panning left and right, using loops and other features.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="ducklings"
+               data-modal-title="All My Little Ducklings!">Show notation</a>
+        </article>
+    </div>
+    <h5>Features in the Spotlight</h5>
+    <div class="sheets sheets--spotlight">
+        <article class="sheet">
+            <h4>Play Notes!</h4>
+            <p>
+                Trigger individual notes to create melodies and sound effects.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="notes"
+               data-modal-title="Play Notes!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Play Chords!</h4>
+            <p>
+                Simultaneously trigger multiple notes to create rich, harmonious chords.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="chords"
+               data-modal-title="Play Chords!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Loop Notes!</h4>
+            <p>
+                Create repeating note patterns to build catchy melodies and rhythms.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="loops"
+               data-modal-title="Loop Notes!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Parallel Tracks!</h4>
+            <p>
+                Create multiple tracks to play different melodies or harmonies at the same time.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="tracks"
+               data-modal-title="Parallel Tracks!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Different Waveforms!</h4>
+            <p>
+                Use different waveforms to create a variety of sounds.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="waveforms"
+               data-modal-title="Different Waveforms!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Adjust BPM!</h4>
+            <p>
+                Change the tempo to create a faster or slower feel.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="bpm"
+               data-modal-title="Adjust BPM!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Adjust Volume!</h4>
+            <p>
+                Control overall output levels for a perfectly balanced mix.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="volume"
+               data-modal-title="Adjust Volume!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Adjust Panning!</h4>
+            <p>
+                Shift audio across the stereo field to craft a dynamic, immersive sound.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="pan"
+               data-modal-title="Adjust Panning!">Show notation</a>
+        </article>
+        <article class="sheet">
+            <h4>Any Length!</h4>
+            <p>
+                Compose music from brief melodies to longer compositions without interruption.
+            </p>
+            <a href="javascript:void(0)" class="outline" data-modal-open data-modal-sound="long"
+               data-modal-title="Any Length!">Show notation</a>
+        </article>
+    </div>
+</main>
+<footer class="container">
+    <p>
+        <small>Built by <a href="https://github.com/marein" class="secondary" target="_blank">@marein</a></small>
+    </p>
+</footer>
+<dialog data-modal>
+    <article>
+        <header>
+            <h3 data-output-title></h3>
+        </header>
+        <label style="max-width: 250px;">
+            Volume
+            <input type="range" id="volume" value="1" step=".1" min="0" max="1">
+        </label>
+        <label for="sheet">
+            Feel free to edit or just hit play
+        </label>
+        <textarea id="sheet" data-output-sheet></textarea>
+        <footer>
+            <button class="secondary" data-modal-close>Close</button>
+            <button data-modal-play>Play!</button>
+        </footer>
+    </article>
+</dialog>
+<script type="module">
+    import {play, setMasterVolume, getMasterVolume} from './src/scriptune.js';
+
+    const dialog = document.querySelector('[data-modal]');
+    const dialogPlay = document.querySelector('[data-modal-play]');
+    const outputTitle = document.querySelector('[data-output-title]');
+    const outputSheet = document.querySelector('[data-output-sheet]');
+    let abortController = new AbortController();
+
+    document.querySelectorAll('[data-modal-open]').forEach(b => b.addEventListener('click', async e => {
+        dialogPlay.disabled = true;
+        outputSheet.disabled = true;
+        outputSheet.value = 'Loading sheet...';
+        outputTitle.innerText = e.target.dataset.modalTitle;
+        dialog.setAttribute('open', '');
+        document.body.classList.add('modal-is-open');
+        outputSheet.value = await (await (fetch(`sheet/${e.target.dataset.modalSound}.txt`))).text();
+        outputSheet.disabled = false;
+        dialogPlay.disabled = false;
+    }));
+
+    dialogPlay.addEventListener('click', async () => {
+        abortController.abort();
+        abortController = new AbortController();
+        await play(outputSheet.value, {signal: abortController.signal});
+    });
+
+    document.querySelectorAll('[data-modal-close]').forEach(b => b.addEventListener('click', async e => {
+        abortController.abort();
+        abortController = new AbortController();
+        e.target.closest('[data-modal]').removeAttribute('open');
+        document.body.classList.remove('modal-is-open');
+    }));
+
+    const volume = document.querySelector('#volume');
+    volume.value = getMasterVolume();
+    volume.addEventListener('input', e => setMasterVolume(parseFloat(e.target.value)));
+</script>
+</body>
+</html>

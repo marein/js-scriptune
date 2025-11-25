@@ -1,0 +1,46 @@
+#BPM 240
+
+#TYPE square
+#TRACK melody
+E5:q -:q B4:q C5:q
+D5:q -:q C5:q B4:q
+A4:q -:q A4:q C5:q
+E5:q -:q D5:q C5:q
+B4:q -:h C5:q
+D5:q -:q E5:q -:q
+C5:q -:q A4:q -:q
+A4:q -:dh
+-:q D5:q -:q F5:q
+A5:q -:q G5:q F5:q
+E5:q -:h C5:q
+E5:q -:q D5:q C5:q
+B4:q -:h C5:q
+D5:q -:q E5:q -:q
+C5:q -:q A4:q -:q
+A4:q -:q -:h
+
+#TYPE triangle
+#TRACK bass
+E2:h B1:h
+D2:h C2:h
+A1:h A1:h
+E2:h D2:h
+B1:h C2:h
+D2:h E2:h
+C2:h A1:h
+A1:w
+D2:h F2:h
+A2:h G2:h
+E2:h C2:h
+E2:h D2:h
+B1:h C2:h
+D2:h E2:h
+C2:h A1:h
+A1:q A1:dh
+
+#TYPE sawtooth
+#TRACK drums
+#LOOP 8
+    C1:s -:de -:q E2:s -:de -:q
+    C1:s -:de C1:s -:de E2:s -:de -:q
+#ENDLOOP

@@ -1,0 +1,33 @@
+; "#PAN <value>".
+; The value is a floating number
+; between -1 and 1.
+; -1 = left, 0 = center, 1 = right.
+
+#TRACK a
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+F4:e E4:e G4:e E4:e
+#PAN -1
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+F4:e E4:e G4:e E4:e
+
+#TRACK b
+-:w -:w
+#PAN 1
+E4:de G4:s B4:e G4:e
+E4:de G4:s B4:e G4:e
+E4:de G4:s B4:e G4:e
+A4:e G4:e B4:e G4:e
+#PAN -1
+E4:de G4:s B4:e G4:e
+#PAN -.5
+E4:de G4:s B4:e G4:e
+#PAN 0
+E4:de G4:s B4:e G4:e
+#PAN .5
+E4:de G4:s B4:e G4:e
+#PAN 1
+E4:de G4:s B4:e G4:e
