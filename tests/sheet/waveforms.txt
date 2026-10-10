@@ -24,3 +24,9 @@ C4:de E4:s G4:e E4:e
 C4:de E4:s G4:e E4:e
 C4:de E4:s G4:e E4:e
 F4:e E4:e G4:e E4:e
+
+#TYPE noise
+C5:s -:s A8:s C5:s C7:s -:s A8:s -:s
+C5:s -:s A8:s -:s C7:s -:s G8:e
+C5:s -:s A8:s C5:s C7:s -:s C7:s A8:s
+C5:s C6:s C7:s C8:s B8:q

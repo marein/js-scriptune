@@ -1,5 +1,5 @@
 ; "<pitch>:<length>".
-; C1 to B7 are valid pitches.
+; C1 to B8 are valid pitches.
 ; "-:<length>" is a pause.
 ; s = 1/16, e = 1/8, q = 1/4,
 ; h = 1/2, w = 1
