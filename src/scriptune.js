@@ -13,6 +13,8 @@ const audioContext = new AudioContext();
 const masterGain = audioContext.createGain();
 masterGain.connect(audioContext.destination);
 setMasterVolume(getMasterVolume());
+const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 2, audioContext.sampleRate);
+noiseBuffer.getChannelData(0).forEach((_, i, samples) => samples[i] = Math.random() < .5 ? -1 : 1);
 
 const pitches = {
     '-': 0,
@@ -29,7 +31,9 @@ const pitches = {
     C6: 1046.50, 'C#6': 1108.73, Db6: 1108.73, D6: 1174.66, 'D#6': 1244.51, Eb6: 1244.51, E6: 1318.51, F6: 1396.91,
     'F#6': 1479.98, Gb6: 1479.98, G6: 1567.98, 'G#6': 1661.22, Ab6: 1661.22, A6: 1760.00, 'A#6': 1864.66, Bb6: 1864.66, B6: 1975.53,
     C7: 2093.00, 'C#7': 2217.46, Db7: 2217.46, D7: 2349.32, 'D#7': 2489.02, Eb7: 2489.02, E7: 2637.02, F7: 2793.83,
-    'F#7': 2959.96, Gb7: 2959.96, G7: 3135.96, 'G#7': 3322.44, Ab7: 3322.44, A7: 3520.00, 'A#7': 3729.31, Bb7: 3729.31, B7: 3951.07
+    'F#7': 2959.96, Gb7: 2959.96, G7: 3135.96, 'G#7': 3322.44, Ab7: 3322.44, A7: 3520.00, 'A#7': 3729.31, Bb7: 3729.31, B7: 3951.07,
+    C8: 4186.01, 'C#8': 4434.92, Db8: 4434.92, D8: 4698.63, 'D#8': 4978.03, Eb8: 4978.03, E8: 5274.04, F8: 5587.65,
+    'F#8': 5919.91, Gb8: 5919.91, G8: 6271.93, 'G#8': 6644.88, Ab8: 6644.88, A8: 7040.00, 'A#8': 7458.62, Bb8: 7458.62, B8: 7902.13
 };
 const durations = {
     w: 4, h: 2, q: 1, e: .5, s: .25, dw: 6, dh: 3, dq: 1.5, de: .75, ds: .375,
@@ -59,31 +63,56 @@ async function sleep(duration, options) {
  * @returns {Promise<void>}
  */
 async function beep(frequency, note, currentTime, options) {
-    const oscillator = audioContext.createOscillator();
+    const [source, output, level] = createSource(frequency, note.type);
     const stereoPanner = audioContext.createStereoPanner();
     stereoPanner.pan.value = note.pan;
     const gain = audioContext.createGain();
-    gain.gain.value = note.volume;
+    gain.gain.value = note.volume * level;
 
-    oscillator.connect(stereoPanner);
+    output.connect(stereoPanner);
     stereoPanner.connect(gain);
     gain.connect(masterGain);
 
-    oscillator.frequency.value = frequency;
-    oscillator.type = note.type;
-    oscillator.start(currentTime);
-    oscillator.stop(currentTime + note.duration);
+    source.start(currentTime, source.buffer ? Math.random() * source.buffer.duration : 0);
+    source.stop(currentTime + note.duration);
 
-    const onAbort = () => oscillator.stop();
+    const onAbort = () => source.stop();
     options.signal?.addEventListener('abort', onAbort);
 
-    return new Promise(r => oscillator.onended = () => {
+    return new Promise(r => source.onended = () => {
         gain.disconnect();
         stereoPanner.disconnect();
-        oscillator.disconnect();
+        output.disconnect();
+        source.disconnect();
         options.signal?.removeEventListener('abort', onAbort);
         r();
     });
+}
+
+/**
+ * @param {Number} frequency
+ * @param {String} type
+ * @returns {[AudioScheduledSourceNode, AudioNode, Number]}
+ */
+function createSource(frequency, type) {
+    if (type !== 'noise') {
+        const oscillator = audioContext.createOscillator();
+        oscillator.frequency.value = frequency;
+        oscillator.type = type;
+
+        return [oscillator, oscillator, 1];
+    }
+
+    const noise = audioContext.createBufferSource();
+    const filter = audioContext.createBiquadFilter();
+    noise.buffer = noiseBuffer;
+    noise.loop = true;
+    filter.type = 'bandpass';
+    filter.frequency.value = frequency;
+    noise.connect(filter);
+
+    const alpha = Math.sin(2 * Math.PI * frequency / audioContext.sampleRate) / (2 * filter.Q.value);
+    return [noise, filter, alpha > 0 ? Math.sqrt((1 + alpha) / alpha) : 0];
 }
 
 /**

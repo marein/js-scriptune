@@ -43,10 +43,27 @@ G2:dh -:q
 C3:dh -:q
 
 #TYPE sawtooth
-#TRACK drums
+#TRACK kick
 #LOOP 4
-    C1:s -:de -:q C3:s -:de -:q
-    -:s -:de C1:s -:de C3:s -:de -:q
+    C1:s -:de -:q -:q -:q
+    -:q C1:s -:de -:q -:q
 #ENDLOOP
-C1:s -:de -:q C3:s -:de -:q
-C1:s -:de C1:s -:de C3:s -:de -:q
+C1:s -:de -:q -:q -:q
+C1:s -:de C1:s -:de -:q -:q
+
+#TYPE noise
+#TRACK snare
+#LOOP 10
+    -:h
+    #VOLUME .6
+    C8:s
+    #VOLUME .3
+    C8:s -:e -:q
+#ENDLOOP
+
+#VOLUME .17
+#TRACK hats
+#LOOP 5
+    A8:s -:de A8:s -:de A8:s -:de A8:s -:de
+    A8:s -:de A8:s -:de A8:s -:de G8:q
+#ENDLOOP
