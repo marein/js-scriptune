@@ -2,11 +2,12 @@
  * @typedef {{signal?: AbortSignal}} Options
  * @typedef {{pitches: Number[], duration: Number, type: String, pan: Number, volume: Number}} Note
  * @typedef {{[key: string]: Note[]}} Tracks
+ * @typedef {(throttleKey?: string) => Promise<void>} ThrottledPlay
+ * @typedef {{play: (sheet: String, options?: Options) => Promise<void>, createThrottledPlay: (sheet: String, throttleTimeMs?: Number, options?: Options) => ThrottledPlay, setVolume: (volume: Number) => void, getVolume: () => Number}} Player
  */
 
 const config = document.querySelector('meta[name="scriptune-config"]');
-let defaultMasterVolume = parseFloat(config?.dataset.defaultMasterVolume);
-defaultMasterVolume = clampVolume(isNaN(defaultMasterVolume) ? 1 : defaultMasterVolume);
+const defaultMasterVolume = parseVolume(config?.dataset.defaultMasterVolume, 1);
 const volumeStorageKey = config?.dataset.volumeStorageKey || 'scriptune-master-volume';
 const scheduleAheadInSeconds = 5;
 const audioContext = new AudioContext();
@@ -15,6 +16,7 @@ masterGain.connect(audioContext.destination);
 setMasterVolume(getMasterVolume());
 const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 2, audioContext.sampleRate);
 noiseBuffer.getChannelData(0).forEach((_, i, samples) => samples[i] = Math.random() < .5 ? -1 : 1);
+const players = new Map();
 
 const pitches = {
     '-': 0,
@@ -59,10 +61,11 @@ async function sleep(duration, options) {
  * @param {Number} frequency
  * @param {Note} note
  * @param {Number} currentTime
+ * @param {AudioNode} destination
  * @param {Options} options
  * @returns {Promise<void>}
  */
-async function beep(frequency, note, currentTime, options) {
+async function beep(frequency, note, currentTime, destination, options) {
     const [source, output, level] = createSource(frequency, note.type);
     const stereoPanner = audioContext.createStereoPanner();
     stereoPanner.pan.value = note.pan;
@@ -71,7 +74,7 @@ async function beep(frequency, note, currentTime, options) {
 
     output.connect(stereoPanner);
     stereoPanner.connect(gain);
-    gain.connect(masterGain);
+    gain.connect(destination);
 
     source.start(currentTime, source.buffer ? Math.random() * source.buffer.duration : 0);
     source.stop(currentTime + note.duration);
@@ -169,21 +172,53 @@ function parseSheet(sheet) {
 /**
  * @param {Note[]} notes
  * @param {Number} currentTime
+ * @param {AudioNode} destination
  * @param {Options} options
  * @returns {Promise<void>}
  */
-async function playTrack(notes, currentTime, options) {
+async function playTrack(notes, currentTime, destination, options) {
     let lastBeeps = [];
 
     for (const note of notes) {
         if (currentTime - audioContext.currentTime > scheduleAheadInSeconds) await sleep(1000, options);
         if (options.signal?.aborted) break;
 
-        lastBeeps = note.pitches.map(pitch => beep(pitch, note, currentTime, options));
+        lastBeeps = note.pitches.map(pitch => beep(pitch, note, currentTime, destination, options));
         currentTime += note.duration;
     }
 
     await Promise.all(lastBeeps);
+}
+
+/**
+ * @param {String} sheet
+ * @param {AudioNode} destination
+ * @param {Options} options
+ * @returns {Promise<void>}
+ */
+async function playTo(sheet, destination, options) {
+    const tracks = parseSheet(sheet), currentTime = audioContext.currentTime;
+
+    await Promise.all(Object.values(tracks).map(notes => playTrack(notes, currentTime, destination, options)));
+}
+
+/**
+ * @param {String} sheet
+ * @param {AudioNode} destination
+ * @param {Number} throttleTimeMs
+ * @param {Options} options
+ * @returns {ThrottledPlay}
+ */
+function createThrottledPlayTo(sheet, destination, throttleTimeMs, options) {
+    const throttleKeys = new Map();
+
+    return async (throttleKey = '') => {
+        const now = Date.now();
+        if (throttleKeys.has(throttleKey) && throttleKeys.get(throttleKey) >= now) return;
+        if (throttleKey) throttleKeys.set(throttleKey, now + throttleTimeMs);
+        await playTo(sheet, destination, options);
+        throttleKeys.forEach((v, k) => v <= now && throttleKeys.delete(k));
+    };
 }
 
 /**
@@ -195,48 +230,80 @@ function clampVolume(volume) {
 }
 
 /**
+ * @param {?String} value
+ * @param {Number} defaultVolume
+ * @returns {Number}
+ */
+function parseVolume(value, defaultVolume) {
+    const volume = parseFloat(value);
+    return clampVolume(isNaN(volume) ? defaultVolume : volume);
+}
+
+/**
+ * @param {String} storageKey
+ * @param {Number} volume
+ * @returns {Number}
+ */
+function writeVolume(storageKey, volume) {
+    volume = clampVolume(volume);
+    localStorage.setItem(storageKey, volume.toString());
+    return volume;
+}
+
+/**
  * @param {Number} volume
  * @returns {void}
  */
 export function setMasterVolume(volume) {
-    volume = clampVolume(volume);
-    localStorage.setItem(volumeStorageKey, volume.toString());
-    masterGain.gain.value = volume / 10;
+    masterGain.gain.value = writeVolume(volumeStorageKey, volume) / 10;
 }
 
 /**
  * @returns {Number}
  */
 export function getMasterVolume() {
-    const volume = parseFloat(localStorage.getItem(volumeStorageKey));
-    return clampVolume(isNaN(volume) ? defaultMasterVolume : volume);
+    return parseVolume(localStorage.getItem(volumeStorageKey), defaultMasterVolume);
 }
 
 /**
+ * @deprecated use `getPlayer(name).play` instead.
  * @param {String} sheet
  * @param {Options} options
  * @returns {Promise<void>}
  */
 export async function play(sheet, options = {}) {
-    const tracks = parseSheet(sheet), currentTime = audioContext.currentTime;
-
-    await Promise.all(Object.values(tracks).map(notes => playTrack(notes, currentTime, options)));
+    await playTo(sheet, masterGain, options);
 }
 
 /**
+ * @deprecated use `getPlayer(name).createThrottledPlay` instead.
  * @param {String} sheet
  * @param {Number} throttleTimeMs
  * @param {Options} options
- * @returns {(throttleKey: string) => Promise<void>}
+ * @returns {ThrottledPlay}
  */
 export function createThrottledPlay(sheet, throttleTimeMs = 3000, options = {}) {
-    const throttleKeys = new Map();
+    return createThrottledPlayTo(sheet, masterGain, throttleTimeMs, options);
+}
 
-    return async (throttleKey = '') => {
-        const now = Date.now();
-        if (throttleKeys.has(throttleKey) && throttleKeys.get(throttleKey) >= now) return;
-        if (throttleKey) throttleKeys.set(throttleKey, now + throttleTimeMs);
-        await play(sheet, options);
-        throttleKeys.forEach((v, k) => v <= now && throttleKeys.delete(k));
+/**
+ * @param {String} name
+ * @returns {Player}
+ */
+export function getPlayer(name) {
+    if (players.has(name)) return players.get(name);
+    if (!/^[a-z][a-z-]*$/.test(name)) throw new Error(`Invalid player name "${name}".`);
+    const storageKey = config?.getAttribute(`data-player-${name}-volume-storage-key`) || `scriptune-player-${name}-volume`;
+    const defaultVolume = parseVolume(config?.getAttribute(`data-default-player-${name}-volume`), 1);
+    const gain = audioContext.createGain();
+    gain.connect(masterGain);
+    const player = {
+        play: (sheet, options = {}) => playTo(sheet, gain, options),
+        createThrottledPlay: (sheet, throttleTimeMs = 3000, options = {}) => createThrottledPlayTo(sheet, gain, throttleTimeMs, options),
+        setVolume: volume => gain.gain.value = writeVolume(storageKey, volume),
+        getVolume: () => parseVolume(localStorage.getItem(storageKey), defaultVolume)
     };
+    player.setVolume(player.getVolume());
+    players.set(name, player);
+    return player;
 }
