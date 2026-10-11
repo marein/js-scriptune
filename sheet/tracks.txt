@@ -1,0 +1,19 @@
+; "#TRACK <name>".
+; Tracks run in parallel.
+
+#TRACK melody
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+C4:de E4:s G4:e E4:e
+F4:e E4:e G4:e E4:e
+
+#TRACK harmony
+E4:q -:q
+E4:q -:q
+E4:q -:q
+A4:q B4:q
+
+; Continuation of a track.
+#TRACK melody
+C5:e -:e C6:e -:e
+C7:e -:e

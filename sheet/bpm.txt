@@ -1,0 +1,48 @@
+; "#BPM <value>".
+; BPM is the number of quarter
+; notes per minute.
+
+#BPM 60
+#LOOP 3
+    C4:de E4:s G4:e E4:e
+#ENDLOOP
+F4:e E4:e G4:e E4:e
+
+#BPM 120
+#LOOP 3
+    C4:de E4:s G4:e E4:e
+#ENDLOOP
+F4:e E4:e G4:e E4:e
+
+#BPM 240
+#LOOP 3
+    C4:de E4:s G4:e E4:e
+#ENDLOOP
+F4:e E4:e G4:e E4:e
+
+#BPM 480
+#LOOP 2
+    #LOOP 3
+        C4:de E4:s G4:e E4:e
+    #ENDLOOP
+    F4:e E4:e G4:e E4:e
+#ENDLOOP
+
+#BPM 960
+#LOOP 4
+    #LOOP 3
+        C4:de E4:s G4:e E4:e
+    #ENDLOOP
+    F4:e E4:e G4:e E4:e
+#ENDLOOP
+
+#BPM 1920
+#LOOP 6
+    #LOOP 3
+        C4:de E4:s G4:e E4:e
+    #ENDLOOP
+    F4:e E4:e G4:e E4:e
+#ENDLOOP
+
+#BPM 120
+C1:h
