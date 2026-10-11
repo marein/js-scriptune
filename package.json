@@ -1,6 +1,6 @@
 {
   "name": "@marein/js-scriptune",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A library that lets you write music in a human-readable format and play it in the browser using the Web Audio API.",
   "homepage": "https://marein.github.io/js-scriptune/",
   "bugs": {
