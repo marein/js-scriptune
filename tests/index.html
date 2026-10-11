@@ -172,8 +172,12 @@
             <h3 data-output-title></h3>
         </header>
         <label style="max-width: 250px;">
-            Volume
+            Master volume
             <input type="range" id="volume" value="1" step=".1" min="0" max="1">
+        </label>
+        <label style="max-width: 250px;">
+            Player volume
+            <input type="range" id="player-volume" value="1" step=".1" min="0" max="1">
         </label>
         <label for="sheet">
             Feel free to edit or just hit play
@@ -186,12 +190,13 @@
     </article>
 </dialog>
 <script type="module">
-    import {play, setMasterVolume, getMasterVolume} from '../src/scriptune.js';
+    import {getPlayer, setMasterVolume, getMasterVolume} from '../src/scriptune.js';
 
     const dialog = document.querySelector('[data-modal]');
     const dialogPlay = document.querySelector('[data-modal-play]');
     const outputTitle = document.querySelector('[data-output-title]');
     const outputSheet = document.querySelector('[data-output-sheet]');
+    const player = getPlayer('main');
     let abortController = new AbortController();
 
     document.querySelectorAll('[data-modal-open]').forEach(b => b.addEventListener('click', async e => {
@@ -209,7 +214,7 @@
     dialogPlay.addEventListener('click', async () => {
         abortController.abort();
         abortController = new AbortController();
-        await play(outputSheet.value, {signal: abortController.signal});
+        await player.play(outputSheet.value, {signal: abortController.signal});
     });
 
     document.querySelectorAll('[data-modal-close]').forEach(b => b.addEventListener('click', async e => {
@@ -222,6 +227,10 @@
     const volume = document.querySelector('#volume');
     volume.value = getMasterVolume();
     volume.addEventListener('input', e => setMasterVolume(parseFloat(e.target.value)));
+
+    const playerVolume = document.querySelector('#player-volume');
+    playerVolume.value = player.getVolume();
+    playerVolume.addEventListener('input', e => player.setVolume(parseFloat(e.target.value)));
 </script>
 </body>
 </html>
